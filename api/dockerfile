@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y python3-tk libgtk-3-0 libx11-6
 WORKDIR /app
 
 # Copiar requirements.txt e instalar dependencias
-COPY requirements.txt requirements.txt
+COPY api/requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiar la aplicación
