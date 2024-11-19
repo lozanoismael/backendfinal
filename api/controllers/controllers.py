@@ -249,7 +249,7 @@ async def get_all_users():
 
         with connection.cursor() as cursor:
             # Consultar todos los usuarios
-            cursor.execute("SELECT id, username, mail, role, password FROM usuarios")
+            cursor.execute("SELECT id, username, role, password FROM usuarios")
             usuarios = cursor.fetchall()
 
         # Formatear el resultado

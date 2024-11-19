@@ -36,7 +36,6 @@ def conexion():
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     password VARCHAR(255) NOT NULL,
                     username VARCHAR(255) UNIQUE NOT NULL,
-                    mail VARCHAR(255) NOT NULL,
                     role VARCHAR(50) NOT NULL
                 );
             """)
