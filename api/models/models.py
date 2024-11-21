@@ -49,21 +49,7 @@ def conexion():
             """)
             print("Tabla ordenes lista")
 
-            ruta_imagen = "../Multimedia/Logo.png"  # Cambia esta ruta a la ubicación de tu imagen
-            with open(ruta_imagen, "rb") as file:
-                imagen_bytes = file.read()
-            imagen_base64 = base64.b64encode(imagen_bytes).decode('utf-8')
-
-            query_check = "SELECT COUNT(*) FROM productos WHERE nombre_producto = %s"
-            cursor.execute(query_check, ("Logo",))
-            resultado = cursor.fetchone()
-
-            if resultado[0] == 0:
-                query_insert = "INSERT INTO productos (nombre_producto, imagen_64) VALUES (%s, %s)"
-                cursor.execute(query_insert, ("Logo", imagen_base64))
-                print("Producto 'Logo' insertado correctamente.")
-            else:
-                print("El producto 'Logo' ya existe en la base de datos.")
+            cursor.execute("INSERT INTO productos(nombre_producto, imagen_64) VALUES(Logo,https://www.canva.com/design/DAGN3kS7gF0/35xQRsI9s-R60_f-s8DuUQ/watch?utm_content=DAGN3kS7gF0&utm_campaign=designshare&utm_medium=link&utm_source=editor)")
 
             connection.commit()
             print("Cambios confirmados en la base de datos.")
