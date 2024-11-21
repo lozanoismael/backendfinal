@@ -49,7 +49,10 @@ def conexion():
             """)
             print("Tabla ordenes lista")
 
-            cursor.execute("INSERT INTO productos(nombre_producto, imagen_64) VALUES(Logo,https://www.canva.com/design/DAGN3kS7gF0/35xQRsI9s-R60_f-s8DuUQ/watch?utm_content=DAGN3kS7gF0&utm_campaign=designshare&utm_medium=link&utm_source=editor)")
+            cursor.execute(
+    "INSERT INTO productos(nombre_producto, imagen_64) VALUES(%s, %s)",
+    ("Logo", "https://www.canva.com/design/DAGN3kS7gF0/35xQRsI9s-R60_f-s8DuUQ/watch?utm_content=DAGN3kS7gF0&utm_campaign=designshare&utm_medium=link&utm_source=editor")
+)
 
             connection.commit()
             print("Cambios confirmados en la base de datos.")
