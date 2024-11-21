@@ -49,7 +49,7 @@ def conexion():
             """)
             print("Tabla ordenes lista")
 
-            ruta_imagen = "multimedia/Logo.jpg"  
+            ruta_imagen = "multimedia/Logo.png"  
             with open(ruta_imagen, "rb") as file:
                 imagen_bytes = file.read()
             imagen_base64 = base64.b64encode(imagen_bytes).decode('utf-8')
