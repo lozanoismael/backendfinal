@@ -1,5 +1,6 @@
 import pymysql
 import os
+import base64
 
 db_host = os.getenv('DB_HOST')
 db_user = os.getenv('DB_USER')
@@ -15,12 +16,9 @@ def conexion():
             database=db_database,
         )
         with connection.cursor() as cursor:
-            # Crear la base de datos si no existe
             cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_database};")
-            # Seleccionar la base de datos
             cursor.execute(f"USE {db_database};")
 
-            # Crear la tabla productos si no existe
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS productos (
                     id_product INT AUTO_INCREMENT PRIMARY KEY,
@@ -30,7 +28,6 @@ def conexion():
             """)
             print("Tabla 'productos' verificada/creada.")
 
-            # Crear la tabla usuarios si no existe
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS usuarios (
                     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -41,7 +38,6 @@ def conexion():
             """)
             print("Tabla 'usuarios' verificada/creada.")
 
-            # Crear la tabla ordenes si no existe
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS ordenes (
                     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -53,7 +49,22 @@ def conexion():
             """)
             print("Tabla ordenes lista")
 
-            # Confirmar cambios
+            ruta_imagen = "../multimedia/Logo.png"  # Cambia esta ruta a la ubicación de tu imagen
+            with open(ruta_imagen, "rb") as file:
+                imagen_bytes = file.read()
+            imagen_base64 = base64.b64encode(imagen_bytes).decode('utf-8')
+
+            query_check = "SELECT COUNT(*) FROM productos WHERE nombre_producto = %s"
+            cursor.execute(query_check, ("Logo",))
+            resultado = cursor.fetchone()
+
+            if resultado[0] == 0:
+                query_insert = "INSERT INTO productos (nombre_producto, imagen_64) VALUES (%s, %s)"
+                cursor.execute(query_insert, ("Logo", imagen_base64))
+                print("Producto 'Logo' insertado correctamente.")
+            else:
+                print("El producto 'Logo' ya existe en la base de datos.")
+
             connection.commit()
             print("Cambios confirmados en la base de datos.")
         return connection
