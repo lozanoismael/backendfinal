@@ -22,7 +22,7 @@ def conexion():
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS productos (
                     id_product INT AUTO_INCREMENT PRIMARY KEY,
-                    imagen_64 TEXT,
+                    imagen_64 LONGTEXT,
                     nombre_producto VARCHAR(255) NOT NULL
                 );
             """)
