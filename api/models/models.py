@@ -53,48 +53,30 @@ def conexion():
             carpeta_multimedia = "multimedia"
             archivos = os.listdir(carpeta_multimedia)
 
-            # Procesar logo
-            logo = "Logo.png"
-            if logo in archivos:
-                ruta_logo = os.path.join(carpeta_multimedia, logo)
-                
-                # Leer archivo y convertir a Base64
-                with open(ruta_logo, "rb") as file:
-                    imagen_bytes = file.read()
-                imagen_base64 = base64.b64encode(imagen_bytes).decode('utf-8')
-                
-                # Verificar si el logo ya existe
-                query_check_logo = "SELECT COUNT(*) FROM productos WHERE nombre_producto = %s"
-                cursor.execute(query_check_logo, ("Logo",))
-                resultado_logo = cursor.fetchone()
-                
-                if resultado_logo[0] == 0:
-                    query_insert_logo = "INSERT INTO productos (nombre_producto, imagen_64) VALUES (%s, %s)"
-                    cursor.execute(query_insert_logo, ("Logo", imagen_base64))
-                    print("Logo insertado en la base de datos.")
-                else:
-                    print("Logo ya existe en la base de datos.")
-            
-            # Procesar los demás productos
             for archivo in archivos:
-                if archivo == logo:  # Saltar el logo
-                    continue
-                
                 ruta_imagen = os.path.join(carpeta_multimedia, archivo)
                 nombre_producto = os.path.splitext(archivo)[0]  # Nombre sin extensión
-                
+
                 # Leer archivo y convertir a Base64
                 with open(ruta_imagen, "rb") as file:
                     imagen_bytes = file.read()
                 imagen_base64 = base64.b64encode(imagen_bytes).decode('utf-8')
                 
-                # Insertar producto en la base de datos
-                query_insert_producto = "INSERT INTO productos (nombre_producto, imagen_64) VALUES (%s, %s)"
-                try:
-                    cursor.execute(query_insert_producto, (nombre_producto, imagen_base64))
-                    print(f"Producto '{nombre_producto}' insertado.")
-                except Exception as e:
-                    print(f"Error al insertar producto '{nombre_producto}': {e}")
+                # Verificar si la imagen ya existe en la base de datos
+                query_check_imagen = "SELECT COUNT(*) FROM productos WHERE imagen_64 = %s"
+                cursor.execute(query_check_imagen, (imagen_base64,))
+                resultado_imagen = cursor.fetchone()
+                
+                if resultado_imagen[0] == 0:
+                    # Insertar producto si no existe
+                    query_insert_producto = "INSERT INTO productos (nombre_producto, imagen_64) VALUES (%s, %s)"
+                    try:
+                        cursor.execute(query_insert_producto, (nombre_producto, imagen_base64))
+                        print(f"Producto '{nombre_producto}' insertado.")
+                    except Exception as e:
+                        print(f"Error al insertar producto '{nombre_producto}': {e}")
+                else:
+                    print(f"Producto con la imagen de '{nombre_producto}' ya existe en la base de datos.")
 
             # ruta_imagen = "multimedia/Logo.png"  
             # with open(ruta_imagen, "rb") as file:
