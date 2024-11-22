@@ -26,6 +26,7 @@ def conexion():
                     nombre_producto VARCHAR(255) NOT NULL
                 );
             """)
+            cursor.execute("ALTER TABLE productos MODIFY COLUMN imagen_64 LONGTEXT;")
             print("Tabla 'productos' verificada/creada.")
 
             cursor.execute("""
