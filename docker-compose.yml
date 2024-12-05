@@ -4,33 +4,18 @@ services:
   
   api:
     build:
-      context: ./api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: api/Dockerfile
     ports:
       - "8000:8000"
     depends_on:
       - mysql
-      - elasticsearch
-    command: >
-      uvicorn main:app 
-      --host 0.0.0.0 
-      --port 8000 
-      --ssl-keyfile /certs/api-key.pem 
-      --ssl-certfile /certs/api-cert.pem 
-      --ssl-ca-certs /certs/ca-cert.pem 
-      --ssl-cert-reqs 2
-    volumes:
-      - ./certs:/certs
 
     environment:
       - DB_HOST=mysql
       - DB_USER=root
       - DB_PASSWORD=Qwerty.123
       - DB_NAME=prueba
-      - ELASTIC_HOST=elasticsearch
-      - SERVER_CERT=/certs/api-cert.pem
-      - SERVER_KEY=/certs/api-key.pem
-      - CA_CERT=/certs/ca-cert.pem
     restart: always
     networks:
       - backend
@@ -48,41 +33,7 @@ services:
     networks:
       - backend
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2
-    environment:
-      - discovery.type=single-node
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - esdata:/usr/share/elasticsearch/data
-    networks:
-      
-      - external-network
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.9.2
-    ports:
-      - "5601:5601"
-    networks:
-      - external-network
-    depends_on:
-      - elasticsearch
   
-  portainer:
-    image: portainer/portainer-ce:latest
-    ports:
-    - "9443:9443"
-    restart: unless-stopped
-    networks:
-      - external-network
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
 
 
 
@@ -91,11 +42,4 @@ networks:
     driver: bridge
   external-network:
     external: true
-
-volumes:
-  portainer_data:
-  certs:
-  esdata:
-    driver: local
-
 

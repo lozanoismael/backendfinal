@@ -66,16 +66,17 @@ async def editar_usuario(id: int, username: str, password: str, role: str):
 async def eliminar_usuario(id: int):
     return await delete_user(id)
 
-
+#Permite crear ordenes
 @router.post("/ordenes/")
 async def ordenes(ordenes: dict):
     return await crear_ordenes(ordenes)
 
-
+#Permite ver ordenes
 @router.get("/seeorders", summary="Obtener todos los pedidos")
 async def obtener_ordenes():
     return await get_all_orders()
 
+#Permite borrar ordenes
 @router.delete("/ordenes/eliminar/{pedido_id}")
 async def eliminar_pedido(pedido_id: str):
     try:

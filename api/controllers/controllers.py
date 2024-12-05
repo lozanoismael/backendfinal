@@ -15,24 +15,6 @@ class Orden(BaseModel):
 class Ordenes(BaseModel):
     ordenes: list[Orden]
 
-es = Elasticsearch(hosts=["http://elasticsearch:9200"])
-logger = logging.getLogger("app_logger")
-logger.setLevel(logging.INFO)
-
-class ElasticsearchHandler(logging.Handler):
-    def emit(self, record):
-        log_doc = {
-            "timestamp": datetime.datetime.now(),
-            "log_level": record.levelname,
-            "message": self.format(record),
-            "event": record.event  # Agrega el evento específico
-        }
-        es.index(index="app-logs", body=log_doc)
-
-es_handler = ElasticsearchHandler()
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-es_handler.setFormatter(formatter)
-logger.addHandler(es_handler)
 
 async def handle_image_upload(nombre_producto: str, file: UploadFile):
     try:
@@ -193,7 +175,6 @@ async def register_user(username: str, password: str, role: str):
     try:
         connection = conexion()
         if connection is None:
-            logger.error("Error de conexión a la base de datos al intentar registrar el usuario.")
             raise HTTPException(status_code=500, detail="Error de conexión a la base de datos")
 
         # Verificar si el usuario ya existe
@@ -201,7 +182,6 @@ async def register_user(username: str, password: str, role: str):
             cursor.execute("SELECT * FROM usuarios WHERE username = %s", (username,))
             result = cursor.fetchone()
             if result:
-                logger.warning(f"Intento de registro con un usuario existente: {username}", extra={'event':'register_user'})
                 raise HTTPException(status_code=400, detail="El usuario ya existe")
 
         # Registrar el nuevo usuario
@@ -209,12 +189,10 @@ async def register_user(username: str, password: str, role: str):
             cursor.execute("INSERT INTO usuarios (username, password, role) VALUES (%s, %s, %s)", (username, password, role))
             connection.commit()
 
-        logger.info(f"Usuario registrado exitosamente: {username}",extra={'event':'register_user'})
         return {"message": "Usuario registrado exitosamente"}
 
     except Exception as e:
         connection.rollback()
-        logger.error(f"Error al registrar el usuario {username}: {e}",extra={'event':'register_user'})
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -222,7 +200,6 @@ async def login_user(username: str, password: str):
     try:
         connection = conexion()
         if connection is None:
-            logger.error("Error de conexión a la base de datos durante el login.", extra={'event': 'login_user'})
             raise HTTPException(status_code=500, detail="Error de conexión a la base de datos")
 
         with connection.cursor() as cursor:
@@ -231,14 +208,11 @@ async def login_user(username: str, password: str):
             result = cursor.fetchone()
 
         if result:
-            logger.info(f"Inicio de sesión exitoso para el usuario: {username}", extra={'event': 'login_user'})
             return {"username": result[0], "role": result[1]}
         else:
-            logger.warning(f"Intento de inicio de sesión fallido para el usuario: {username}", extra={'event': 'login_user'})
             raise HTTPException(status_code=400, detail="Credenciales incorrectas")
 
     except Exception as e:
-        logger.error(f"Error durante el inicio de sesión del usuario {username}: {e}", extra={'event': 'login_user'})
         raise HTTPException(status_code=500, detail=str(e))
 
 async def get_all_users():
@@ -306,27 +280,24 @@ async def delete_user(user_id: int):
     try:
         connection = conexion()
         if connection is None:
-            logger.error(f"Error de conexión a la base de datos al intentar eliminar al usuario con ID {user_id}.", extra={'event': 'delete_user'})
             raise HTTPException(status_code=500, detail="Error de conexión a la base de datos")
 
         with connection.cursor() as cursor:
             cursor.execute("DELETE FROM usuarios WHERE id = %s", (user_id,))
             connection.commit()
 
-        logger.info(f"Usuario  con ID {user_id} eliminado correctamente.", extra={'event': 'delete_user'})
         return {"message": "Usuario eliminado correctamente"}
 
     except Exception as e:
         if connection:
             connection.rollback()
-        logger.error(f"Error al eliminar el usuario {user_id}: {e}", extra={'event': 'delete_user'})
         raise HTTPException(status_code=500, detail=str(e))
     
 async def crear_ordenes(ordenes: Dict[str, List[Dict[str, Union[str, int]]]]):
     try:
         connection = conexion()
         with connection.cursor() as cursor:
-            for orden in ordenes['ordenes']:  # Asegúrate de que este es el acceso correcto
+            for orden in ordenes['ordenes']:  
                 cursor.execute(
                     "INSERT INTO ordenes (pedido_id, imagen, nombre_producto, cantidad) VALUES (%s, %s, %s, %s)", 
                     (orden['id'], orden['imagen'], orden['nombre_producto'], orden['cantidad'])
@@ -344,11 +315,9 @@ async def get_all_orders():
             raise HTTPException(status_code=500, detail="Error de conexión a la base de datos")
 
         with connection.cursor() as cursor:
-            # Consulta SQL para obtener también el pedido_id
             cursor.execute("SELECT pedido_id, imagen, nombre_producto, cantidad FROM ordenes")
             ordenes = cursor.fetchall()
 
-        # Agrupar las órdenes por pedido_id
         ordenes_agrupadas = {}
         for u in ordenes:
             pedido_id = u[0]  # Esto ahora debe obtener el pedido_id correctamente
